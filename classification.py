@@ -4,11 +4,13 @@ import calculate_features
 # Import libraries
 import matplotlib.pyplot as plt
 from sklearn import svm
+from sklearn.ensemble import RandomForestClassifier
 from sklearn import preprocessing
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix
+import operator
 from sklearn.datasets import make_blobs
 from sklearn.inspection import DecisionBoundaryDisplay
 
@@ -34,29 +36,59 @@ def main():
     test_scaled = min_max_scaler.fit_transform(x_test)
     x_test = pd.DataFrame(test_scaled)
 
+    # Todo: Random Forest Classifier
+    # define the model
+    model = RandomForestClassifier()
+    # fit the model on the whole dataset
+    model.fit(np.array(x_train), np.array(y_train))
+    # make predictions
+    yhat = model.predict(np.array(x_test))
+    print('Predicted Class: ', yhat)
+
 
     # Todo: SVM classification, try different kernels and keep the most promising.
-    # todo: call the different kernels at once because every time the sample set changes
-    kernels = ['linear', 'poly', 'rbf', 'sigmoid', 'precomputed']
+    # call the different kernels
+    kernels = ['linear', 'poly', 'rbf', 'sigmoid']
     labels_SVM_kernels = []
-    for k in kernels:
+    for i in range(len(kernels)):
         svm_labels_pred = []
-        clf = svm.SVC(kernel='linear') # kernel{‘linear’, ‘poly’, ‘rbf’, ‘sigmoid’, ‘precomputed’}
+        clf = svm.SVC(kernel=kernels[i]) # kernel{‘linear’, ‘poly’, ‘rbf’, ‘sigmoid’, ‘precomputed’}
         clf.fit(np.array(x_train), np.array(y_train))
         svm_labels_pred = clf.predict(np.array(x_test))
         labels_SVM_kernels.append(svm_labels_pred)
 
 
-    # Todo: Evaluation
+    # # Todo: Evaluation
     # Metric: Confusion Matrix
+    i = 0
+    dict = {}
     for labels_pred in labels_SVM_kernels:
+        print('\'', kernels[i], '\'', 'kernel')
+
+        # 1st Metric: Confusion matrix
         conf_matrix = confusion_matrix(y_test, labels_pred) \
-        # Metric: Overall Accuracy
+        # 2nd Metric: Overall Accuracy
         overall_accuracy = sum(np.diagonal(conf_matrix)) / len(y_test)
         print("Overall Accuracy", overall_accuracy)
-        # Metric: Mean per-class accuracy
+        # 3rd Metric: Mean per-class accuracy
         mA = (1/5) * np.sum(np.divide(np.diagonal(conf_matrix), num_pc))
         print("Mean per class Accuracy: ", mA)
+
+        # add the kernel name and the corresponding accuracy in a dictionary
+        dict[kernels[i]] = overall_accuracy
+        i += 1
+
+    # # choose the most promising kernel retrieving the key of the maximum value from the dictionary
+    chosen_kernel_SVM = max(zip(dict.values(), dict.keys()))[1] # rbf for the 6:4
+
+
+
+
+
+
+
+
+
 
 
 
