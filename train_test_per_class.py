@@ -1,3 +1,11 @@
+# Import modules
+import calculate_features
+import pandas as pd
+from sklearn.model_selection import train_test_split
+
+# todo: calculate features
+df = calculate_features.load_and_calculate_features()
+
 # Todo: Separate the dataset into training and test set randomly for each class separately
 categories = ['building', 'car', 'fence', 'pole', 'tree']
 x_train, x_test, y_train, y_test = [], [], [], []
