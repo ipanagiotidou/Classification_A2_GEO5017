@@ -31,18 +31,76 @@ def main():
     # todo: calculate features
     df = calculate_features.load_and_calculate_features()
 
-    # Todo: Separate the dataset into training and test set randomly
-    x_train_cat,x_test_cat,y_train_cat,y_test_cat=train_test_split(
-            df[["volume", "proj_area", "density_3d", "median_height", "area_3d", "density_3d"]],
-            df['label'],test_size=0.4
-            )
+    # Todo: Feature Selection Strategies - Scatter Metrics
+    # feeding each feature at a time calculate the covariance
+    features = ["volume", "proj_area", "density_3d", "median_height", "area_3d", "density_2d"]
+    categories = ['building', 'car', 'fence', 'pole', 'tree']
+
+
+    for i in range(len(features)):
+        # current feature set
+        features_current = [feat for id, feat in enumerate(features) if id != i]
+        # initialize an empty dataframe
+        df0 = pd.DataFrame(0, index=features_current, columns=features_current)
+
+        # mean of all classes
+        mean_all_classes = df[features_current].mean()
+        # initialize an empty Series
+        steps_Sb = pd.Series(0, index=features_current)
+
+        for cat in categories:
+            # covariance per class
+            df_cov_per_class = 0.2 * df.loc[df.label == cat, features_current].cov()
+            df0 = df0.add(df_cov_per_class, fill_value=0)
+
+            # mean per class
+            mean_per_class = df.loc[df.label == cat, features_current].mean()
+            steps_Sb += 0.2 * (mean_per_class - mean_all_classes) * (mean_per_class - mean_all_classes).transpose()
+
+
+        traceSw = np.trace(df0.to_numpy())
+        steps_Sb = steps_Sb.to_numpy()
+        traceSb = steps_Sb.sum()
+
+        # compute criterion J
+        criterion_J = traceSb/traceSw
+        print(criterion_J)
 
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    # # Todo: Separate the dataset into training and test set randomly
+    # x_train,x_test,y_train,y_test=train_test_split(
+    #         df[["volume", "proj_area", "density_3d", "median_height", "area_3d", "density_2d"]],
+    #         df['label'],test_size=0.4
+    #         )
+    #
     # # Todo: Try different train-test ratio
-    # # ...
+    # # test_size=0.3, test_size=0.2, test_size=0.1
     #
     # # Retrieve information about the number of data samples of each class separately
     # df = pd.DataFrame(y_test).reset_index()
@@ -56,8 +114,9 @@ def main():
     # x_train = pd.DataFrame(train_scaled)
     # test_scaled = min_max_scaler.fit_transform(x_test)
     # x_test = pd.DataFrame(test_scaled)
-
-
+    #
+    #
+    #
     # ### --- --- --- IMPLEMENTATION OF RANFOM FOREST CLASSIFIER --- --- ---
     #
     # # Todo: Random Forest Classifier
@@ -70,9 +129,9 @@ def main():
     #
     # # Todo: Evaluation of Random Forest
     # conf_matrix, overall_accuracy, mA = evaluation(y_test, class_pred_RF, num_pc)
-
-
-
+    #
+    #
+    #
     # ### --- --- --- IMPLEMENTATION OF SVM CLASSIFIER --- --- ---
     #
     # # Todo: SVM classification, try different kernels and keep the most promising.
