@@ -13,7 +13,6 @@ from sklearn.metrics import confusion_matrix
 
 
 def evaluation(y_test, class_pred_RF, num_pc):
-    print("--- --- Random Forest Evaluation 2: --- --- ")
     # 1st Metric: Confusion matrix
     conf_matrix = confusion_matrix(y_test, class_pred_RF)
     # 2nd Metric: Overall Accuracy
@@ -33,38 +32,44 @@ def main():
     df = calculate_features.load_and_calculate_features()
 
     # Todo: Separate the dataset into training and test set randomly
-    x_train,x_test,y_train,y_test=train_test_split(df[["volume", "proj_area", "density_3d", "median_height", "area_3d", "density_3d"]],
-                                                   df['label'],test_size=0.4)
-    # Todo: Try different train-test ratio
-    # ...
-
-    df = pd.DataFrame(y_test).reset_index()
-    df.columns = ['id', 'label']
-    num_pc = df.groupby(by=['label']).count()
-    num_pc = np.array(num_pc['id'])
-
-    # Todo: normalize the data = each attribute value / max possible value of this attribute
-    min_max_scaler = preprocessing.MinMaxScaler()
-    train_scaled = min_max_scaler.fit_transform(x_train)
-    x_train = pd.DataFrame(train_scaled)
-    test_scaled = min_max_scaler.fit_transform(x_test)
-    x_test = pd.DataFrame(test_scaled)
+    x_train_cat,x_test_cat,y_train_cat,y_test_cat=train_test_split(
+            df[["volume", "proj_area", "density_3d", "median_height", "area_3d", "density_3d"]],
+            df['label'],test_size=0.4
+            )
 
 
-    ### --- --- --- IMPLEMENTATION OF RANFOM FOREST CLASSIFIER --- --- ---
-
-    # Todo: Random Forest Classifier
-    # define the model
-    model = RandomForestClassifier()
-    # fit the model on the whole dataset
-    model.fit(np.array(x_train), np.array(y_train))
-    # make predictions
-    class_pred_RF = model.predict(np.array(x_test))
-
-    # Todo: Evaluation of Random Forest
-    conf_matrix, overall_accuracy, mA = evaluation(y_test, class_pred_RF, num_pc)
 
 
+
+    # # Todo: Try different train-test ratio
+    # # ...
+    #
+    # # Retrieve information about the number of data samples of each class separately
+    # df = pd.DataFrame(y_test).reset_index()
+    # df.columns = ['id', 'label']
+    # num_pc = df.groupby(by=['label']).count()
+    # num_pc = np.array(num_pc['id']) # returns an array with the number of samples per class in the training set
+    #
+    # # Todo: normalize the data = each attribute value / max possible value of this attribute
+    # min_max_scaler = preprocessing.MinMaxScaler()
+    # train_scaled = min_max_scaler.fit_transform(x_train)
+    # x_train = pd.DataFrame(train_scaled)
+    # test_scaled = min_max_scaler.fit_transform(x_test)
+    # x_test = pd.DataFrame(test_scaled)
+
+
+    # ### --- --- --- IMPLEMENTATION OF RANFOM FOREST CLASSIFIER --- --- ---
+    #
+    # # Todo: Random Forest Classifier
+    # # define the model
+    # model = RandomForestClassifier()
+    # # fit the model on the whole dataset
+    # model.fit(np.array(x_train), np.array(y_train))
+    # # make predictions
+    # class_pred_RF = model.predict(np.array(x_test))
+    #
+    # # Todo: Evaluation of Random Forest
+    # conf_matrix, overall_accuracy, mA = evaluation(y_test, class_pred_RF, num_pc)
 
 
 
@@ -87,22 +92,13 @@ def main():
     # dict = {}
     # for labels_pred in labels_SVM_kernels:
     #     print('\'', kernels[i], '\'', 'kernel')
-    #
-    #     # 1st Metric: Confusion matrix
-    #     conf_matrix = confusion_matrix(y_test, labels_pred)
-    #     # 2nd Metric: Overall Accuracy
-    #     overall_accuracy = sum(np.diagonal(conf_matrix)) / len(y_test)
-    #     print("Overall Accuracy", overall_accuracy)
-    #     # 3rd Metric: Mean per-class accuracy
-    #     mA = (1/5) * np.sum(np.divide(np.diagonal(conf_matrix), num_pc))
-    #     print("Mean per class Accuracy: ", mA)
-    #
+    #     conf_matrix, overall_accuracy, mA = evaluation(y_test, labels_pred, num_pc)
     #     # add the kernel name and the corresponding accuracy in a dictionary
     #     dict[kernels[i]] = overall_accuracy
     #     i += 1
     #
-    # # # choose the most promising kernel retrieving the key of the maximum value from the dictionary
-    # chosen_kernel_SVM = max(zip(dict.values(), dict.keys()))[1] # rbf for the 6:4
+    # # choose the most promising kernel retrieving the key of the maximum value from the dictionary
+    # chosen_kernel_SVM = max(zip(dict.values(), dict.keys()))[1] # best kernel: rbf for the 6:4 ratio
 
 
 
