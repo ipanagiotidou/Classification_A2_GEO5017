@@ -15,30 +15,16 @@ from sklearn.metrics import confusion_matrix
 def evaluation(y_test, class_pred_RF, num_pc):
     # 1st Metric: Confusion matrix
     conf_matrix = confusion_matrix(y_test, class_pred_RF)
+    conf_matrix = pd.DataFrame(conf_matrix, index=['building', 'car', 'fence', 'pole', 'tree'], columns=['building', 'car', 'fence', 'pole', 'tree'])
     # 2nd Metric: Overall Accuracy
     overall_accuracy = sum(np.diagonal(conf_matrix)) / len(y_test)
-    print("Overall Accuracy", overall_accuracy)
     # 3rd Metric: Mean per-class accuracy
     mA = (1 / 5) * np.sum(np.divide(np.diagonal(conf_matrix), num_pc))
-    print("Mean per class Accuracy: ", mA)
     return conf_matrix, overall_accuracy, mA
 
-
-def main():
-
-    # MULTI-CLASS CLASSIFICATION
-
-    # todo: calculate features
-    df = calculate_features.load_and_calculate_features()
-
-    # Todo: Feature Selection Strategies - Scatter Metrics
-    # feeding each feature at a time calculate the covariance
-    features = ["volume", "proj_area", "density_3d", "median_height", "area_3d", "density_2d"]
-    categories = ['building', 'car', 'fence', 'pole', 'tree']
-
-    while len(features) > 5:
+def feature_selection(df, features, categories):
+    while len(features) > 5: # set number of features
         criteria = []
-        print(features)
         for i in range(len(features)):
             # current feature set
             features_current = [feat for id, feat in enumerate(features) if id != i]
@@ -59,7 +45,6 @@ def main():
                 mean_per_class = df.loc[df.label == cat, features_current].mean()
                 steps_Sb += 0.2 * (mean_per_class - mean_all_classes) * (mean_per_class - mean_all_classes).transpose()
 
-
             traceSw = np.trace(df0.to_numpy())
             steps_Sb = steps_Sb.to_numpy()
             traceSb = steps_Sb.sum()
@@ -71,14 +56,37 @@ def main():
         index = np.argmin(criteria)
         del features[index]
 
+    return features
 
+
+
+def main():
+
+    # MULTI-CLASS CLASSIFICATION
+
+    # todo: calculate features
+    df = calculate_features.load_and_calculate_features()
+
+    # Todo: Feature Selection Strategies - Scatter Metrics
+    # feeding each feature at a time calculate the covariance
+    features = ["volume", "proj_area", "density_3d", "median_height", "area_3d", "density_2d"]
+    categories = ['building', 'car', 'fence', 'pole', 'tree']
+    selected_features = feature_selection(df, features, categories)
 
 
     # Todo: Separate the dataset into training and test set randomly
     x_train,x_test,y_train,y_test=train_test_split(
-            df[features],
+            df[selected_features],
             df['label'],test_size=0.4
             )
+
+    # make sure that you have sampled fairly all categories --> apply the ratio in each one of the object categories
+    print(y_test.value_counts())
+    if all(val >= 34 for val in y_test.value_counts()):
+        pass
+    else:
+        exit("RERUN the program. Not equally represented object categories in the train-test set split.")
+
 
     # Todo: Try different train-test ratio
     # test_size=0.3, test_size=0.2, test_size=0.1
@@ -87,7 +95,8 @@ def main():
     df = pd.DataFrame(y_test).reset_index()
     df.columns = ['id', 'label']
     num_pc = df.groupby(by=['label']).count()
-    num_pc = np.array(num_pc['id']) # returns an array with the number of samples per class in the training set
+    num_pc = np.array(num_pc['id']) # returns an array with the number of samples per class in the test set
+
 
     # Todo: normalize the data = each attribute value / max possible value of this attribute
     min_max_scaler = preprocessing.MinMaxScaler()
@@ -109,36 +118,44 @@ def main():
     class_pred_RF = model.predict(np.array(x_test))
 
     # Todo: Evaluation of Random Forest
+    print("\n--- --- --- RF Evaluation: --- --- ---")
     conf_matrix, overall_accuracy, mA = evaluation(y_test, class_pred_RF, num_pc)
+    print("Confusion Matrix\n", conf_matrix)
+    print("Overall Accuracy", overall_accuracy)
+    print("Mean per class Accuracy: ", mA)
 
 
+    ### --- --- --- IMPLEMENTATION OF SVM CLASSIFIER --- --- ---
 
-    # ### --- --- --- IMPLEMENTATION OF SVM CLASSIFIER --- --- ---
-    #
-    # # Todo: SVM classification, try different kernels and keep the most promising.
-    # # call the different kernels
-    # kernels = ['linear', 'poly', 'rbf', 'sigmoid']
-    # labels_SVM_kernels = []
-    # for i in range(len(kernels)):
-    #     clf = svm.SVC(kernel=kernels[i]) # kernel{‘linear’, ‘poly’, ‘rbf’, ‘sigmoid’, ‘precomputed’}
-    #     clf.fit(np.array(x_train), np.array(y_train))
-    #     svm_labels_pred = clf.predict(np.array(x_test))
-    #     labels_SVM_kernels.append(svm_labels_pred)
-    #
-    #
-    # # Todo: Evaluation of SVM
-    # print("\n--- --- --- SVM Evaluation: --- --- ---")
-    # i = 0
-    # dict = {}
-    # for labels_pred in labels_SVM_kernels:
-    #     print('\'', kernels[i], '\'', 'kernel')
-    #     conf_matrix, overall_accuracy, mA = evaluation(y_test, labels_pred, num_pc)
-    #     # add the kernel name and the corresponding accuracy in a dictionary
-    #     dict[kernels[i]] = overall_accuracy
-    #     i += 1
-    #
-    # # choose the most promising kernel retrieving the key of the maximum value from the dictionary
-    # chosen_kernel_SVM = max(zip(dict.values(), dict.keys()))[1] # best kernel: rbf for the 6:4 ratio
+    # Todo: SVM classification, try different kernels and keep the most promising.
+    # call the different kernels
+    kernels = ['linear', 'poly', 'rbf', 'sigmoid']
+    labels_SVM_kernels = []
+    for i in range(len(kernels)):
+        clf = svm.SVC(kernel=kernels[i]) # kernel{‘linear’, ‘poly’, ‘rbf’, ‘sigmoid’, ‘precomputed’}
+        clf.fit(np.array(x_train), np.array(y_train))
+        svm_labels_pred = clf.predict(np.array(x_test))
+        labels_SVM_kernels.append(svm_labels_pred)
+
+    # Todo: Evaluation of SVM
+    print("\n--- --- --- SVM Evaluation: --- --- ---")
+    i = 0
+    dict = {}
+    for labels_pred in labels_SVM_kernels:
+        conf_matrix, overall_accuracy, mA = evaluation(y_test, labels_pred, num_pc)
+        # add the kernel name and the corresponding accuracy in a dictionary
+        dict[kernels[i]] = overall_accuracy
+        i += 1
+
+    # choose the most promising kernel retrieving the key of the maximum value from the dictionary
+    chosen_kernel_SVM = max(zip(dict.values(), dict.keys()))[1] # best kernel: rbf for the 6:4 ratio
+    clf = svm.SVC(kernel= chosen_kernel_SVM)
+    clf.fit(np.array(x_train), np.array(y_train))
+    svm_labels_pred = clf.predict(np.array(x_test))
+    conf_matrix, overall_accuracy, mA = evaluation(y_test, svm_labels_pred, num_pc)
+    print("Confusion Matrix\n", conf_matrix)
+    print("Overall Accuracy", overall_accuracy)
+    print("Mean per class Accuracy: ", mA)
 
 
 
