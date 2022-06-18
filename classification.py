@@ -86,12 +86,11 @@ def main():
                 )
 
         # TODO: deactivate when finished
-        # make sure that you have sampled fairly all categories --> apply the ratio in each one of the object categories
-        # print(y_test.value_counts())
-        if all(val >= (ratio*100 - ceil(ratio*100/8)) for val in y_test.value_counts()):
-            pass
-        else:
-            exit("RERUN the program. Not equally represented object categories in the train-test set split.")
+        # make sure that you have fairly sampled all categories --> apply the ratio in each one of the object categories
+        # if all(val >= (ratio*100 - ceil(ratio*100/8)) for val in y_test.value_counts()):
+        #     pass
+        # else:
+        #     exit("RERUN the program. Not equally represented object categories in the train-test set split.")
 
 
         # Retrieve information about the number of data samples of each class separately
