@@ -36,7 +36,7 @@ def main():
     features = ["volume", "proj_area", "density_3d", "median_height", "area_3d", "density_2d"]
     categories = ['building', 'car', 'fence', 'pole', 'tree']
 
-    while len(features) > 3:
+    while len(features) > 5:
         criteria = []
         print(features)
         for i in range(len(features)):
@@ -71,13 +71,12 @@ def main():
         index = np.argmin(criteria)
         del features[index]
 
-    print(features)
 
 
 
     # Todo: Separate the dataset into training and test set randomly
     x_train,x_test,y_train,y_test=train_test_split(
-            df[["volume", "proj_area", "density_3d", "median_height", "area_3d", "density_2d"]],
+            df[features],
             df['label'],test_size=0.4
             )
 
@@ -114,32 +113,32 @@ def main():
 
 
 
-    ### --- --- --- IMPLEMENTATION OF SVM CLASSIFIER --- --- ---
-
-    # Todo: SVM classification, try different kernels and keep the most promising.
-    # call the different kernels
-    kernels = ['linear', 'poly', 'rbf', 'sigmoid']
-    labels_SVM_kernels = []
-    for i in range(len(kernels)):
-        clf = svm.SVC(kernel=kernels[i]) # kernel{‘linear’, ‘poly’, ‘rbf’, ‘sigmoid’, ‘precomputed’}
-        clf.fit(np.array(x_train), np.array(y_train))
-        svm_labels_pred = clf.predict(np.array(x_test))
-        labels_SVM_kernels.append(svm_labels_pred)
-
-
-    # Todo: Evaluation of SVM
-    print("\n--- --- --- SVM Evaluation: --- --- ---")
-    i = 0
-    dict = {}
-    for labels_pred in labels_SVM_kernels:
-        print('\'', kernels[i], '\'', 'kernel')
-        conf_matrix, overall_accuracy, mA = evaluation(y_test, labels_pred, num_pc)
-        # add the kernel name and the corresponding accuracy in a dictionary
-        dict[kernels[i]] = overall_accuracy
-        i += 1
-
-    # choose the most promising kernel retrieving the key of the maximum value from the dictionary
-    chosen_kernel_SVM = max(zip(dict.values(), dict.keys()))[1] # best kernel: rbf for the 6:4 ratio
+    # ### --- --- --- IMPLEMENTATION OF SVM CLASSIFIER --- --- ---
+    #
+    # # Todo: SVM classification, try different kernels and keep the most promising.
+    # # call the different kernels
+    # kernels = ['linear', 'poly', 'rbf', 'sigmoid']
+    # labels_SVM_kernels = []
+    # for i in range(len(kernels)):
+    #     clf = svm.SVC(kernel=kernels[i]) # kernel{‘linear’, ‘poly’, ‘rbf’, ‘sigmoid’, ‘precomputed’}
+    #     clf.fit(np.array(x_train), np.array(y_train))
+    #     svm_labels_pred = clf.predict(np.array(x_test))
+    #     labels_SVM_kernels.append(svm_labels_pred)
+    #
+    #
+    # # Todo: Evaluation of SVM
+    # print("\n--- --- --- SVM Evaluation: --- --- ---")
+    # i = 0
+    # dict = {}
+    # for labels_pred in labels_SVM_kernels:
+    #     print('\'', kernels[i], '\'', 'kernel')
+    #     conf_matrix, overall_accuracy, mA = evaluation(y_test, labels_pred, num_pc)
+    #     # add the kernel name and the corresponding accuracy in a dictionary
+    #     dict[kernels[i]] = overall_accuracy
+    #     i += 1
+    #
+    # # choose the most promising kernel retrieving the key of the maximum value from the dictionary
+    # chosen_kernel_SVM = max(zip(dict.values(), dict.keys()))[1] # best kernel: rbf for the 6:4 ratio
 
 
 
