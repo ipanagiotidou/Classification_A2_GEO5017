@@ -75,7 +75,7 @@ def load_and_calculate_features():
             median_z = statistics.median(list_z)
             height = median_z
             # Add volume in the object's dataframe
-            df_row.loc[:, 'height'] = height
+            df_row.loc[:, 'median_height'] = height
 
             # -- -- -- -- -- --5th FEATURE: POINT DENSITY 2D -- -- -- -- -- -- --
             density_2d = proj_area / len(pts_list)

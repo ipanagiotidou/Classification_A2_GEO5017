@@ -1,9 +1,9 @@
 # Import modules
 import calculate_features
-from math import ceil
+import plot_ratios_accuracies
 
 # Import libraries
-import matplotlib.pyplot as plt
+from math import ceil
 from sklearn import svm
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import preprocessing
@@ -159,6 +159,7 @@ def main():
         print("Overall Accuracy", overall_accuracy)
         print("Mean per class Accuracy: ", mA, "\n")
 
+    plot_ratios_accuracies.plot_main()
 
 
 
