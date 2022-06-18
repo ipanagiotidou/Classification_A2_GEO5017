@@ -75,11 +75,13 @@ def main():
 
 
     # Todo: Separate the dataset into training and test set randomly
+
     x_train,x_test,y_train,y_test=train_test_split(
             df[selected_features],
             df['label'],test_size=0.4
             )
 
+    # TODO: deactivate when finished
     # make sure that you have sampled fairly all categories --> apply the ratio in each one of the object categories
     print(y_test.value_counts())
     if all(val >= 34 for val in y_test.value_counts()):
@@ -87,9 +89,6 @@ def main():
     else:
         exit("RERUN the program. Not equally represented object categories in the train-test set split.")
 
-
-    # Todo: Try different train-test ratio
-    # test_size=0.3, test_size=0.2, test_size=0.1
 
     # Retrieve information about the number of data samples of each class separately
     df = pd.DataFrame(y_test).reset_index()
