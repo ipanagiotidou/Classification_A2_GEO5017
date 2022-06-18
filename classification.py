@@ -1,6 +1,6 @@
 # Import modules
 import calculate_features
-import plot_ratios_accuracies
+import plot_learning_curve
 
 # Import libraries
 from math import ceil
@@ -56,7 +56,7 @@ def feature_selection(df, features, categories):
 
         index = np.argmin(criteria)
         del features[index]
-
+    print(features)
     return features
 
 
@@ -159,7 +159,7 @@ def main():
         print("Overall Accuracy", overall_accuracy)
         print("Mean per class Accuracy: ", mA, "\n")
 
-    plot_ratios_accuracies.plot_main()
+    plot_learning_curve.plot_main()
 
 
 
