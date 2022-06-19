@@ -85,8 +85,8 @@ def main():
                 df['label'],test_size=ratio
                 )
 
-        # TODO: deactivate when finished
-        # make sure that you have fairly sampled all categories --> apply the ratio in each one of the object categories
+        # TODO: DEACTIVATE WHEN FINISHED - Checks if sufficient number of test-train samples as ratio train-test demands
+        # # make sure that you have fairly sampled all categories --> apply the ratio in each one of the object categories
         # if all(val >= (ratio*100 - ceil(ratio*100/8)) for val in y_test.value_counts()):
         #     pass
         # else:
