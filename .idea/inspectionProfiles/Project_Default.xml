@@ -1,0 +1,15 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="dict.pop" />
+          <option value="open3d.io.read_point_cloud" />
+          <option value="open3d.visualization.draw_geometries" />
+          <option value="object.labels_" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
